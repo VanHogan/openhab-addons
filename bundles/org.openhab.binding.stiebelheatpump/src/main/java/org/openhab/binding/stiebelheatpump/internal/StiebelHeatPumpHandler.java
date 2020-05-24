@@ -82,7 +82,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
 
     /** cyclic pooling of sensor/status data from heat pump */
     ScheduledFuture<?> refreshSensorStatusJob;
-    /** cyclic pooling of sensor/status data from heat pump */
+    /** cyclic pooling of setting data from heat pump */
     ScheduledFuture<?> refreshSettingJob;
     /** cyclic update of time in the heat pump */
     ScheduledFuture<?> timeRefreshJob;
@@ -204,9 +204,12 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
         }
         Type dataType = record.getDataType();
         if (dataType == RecordDefinition.Type.Settings) {
-            getSettings(request);
+            if (refreshSettingJob != null) {
+                getSettings(request);
+            }
             if (!heatPumpSettingRefresh.getRequests().contains(request)) {
                 heatPumpSettingRefresh.getRequests().add(request);
+                logger.info("Request {} added to setting refresh scheduler.", requestStr);
             }
         }
         if (dataType != RecordDefinition.Type.Settings
@@ -371,7 +374,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
             Instant end = Instant.now();
             logger.debug("Sensor/Status refresh took {} seconds.", Duration.between(start, end).getSeconds());
             updateChannels(data);
-        }, 20, config.refresh, TimeUnit.SECONDS);
+        }, 10, config.refresh, TimeUnit.SECONDS);
     }
 
     /**
@@ -405,7 +408,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
             Instant end = Instant.now();
             logger.debug("Setting refresh took {} seconds.", Duration.between(start, end).getSeconds());
             updateChannels(data);
-        }, 60, 3600, TimeUnit.SECONDS);
+        }, 2, 3600, TimeUnit.SECONDS);
     }
 
     /**
