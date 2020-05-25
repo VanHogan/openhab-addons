@@ -579,7 +579,9 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
                     QuantityType<Dimensionless> percent = new QuantityType<>(value, SmartHomeUnits.PERCENT);
                     updateState(channelUID, percent);
                     break;
-
+                case "String":
+                    updateState(channelUID, new StringType(value.toString()));
+                    break;
                 default:
                     updateState(channelUID, new DecimalType((Double) value));
             }
