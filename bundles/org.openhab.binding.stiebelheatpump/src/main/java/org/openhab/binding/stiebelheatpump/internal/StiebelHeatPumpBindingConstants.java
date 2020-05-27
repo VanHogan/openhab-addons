@@ -41,8 +41,8 @@ public class StiebelHeatPumpBindingConstants {
     // public static final String CHANNELGROUP_VERSION = "channelGroupTypeVersion";
     public static final String CHANNELID_VERSION = "version";
     public static final String CHANNEL_VERSION = "version" + CHANNELGROUPSEPERATOR + CHANNELID_VERSION;
-    public static final byte REQUEST_VERSION = (byte) 0xFD;
-    public static final byte REQUEST_TIME = (byte) 0xFC;
+    public static final byte[] REQUEST_VERSION = { (byte) 0xFD };
+    public static final byte[] REQUEST_TIME = { (byte) 0xFC };
     public static final String CHANNELID_TIME = "time";
     public static final String CHANNEL_SETTIME = "time" + CHANNELGROUPSEPERATOR + "setTime";
     public static final String CHANNEL_DUMPRESPONSE = "version" + CHANNELGROUPSEPERATOR + "dumpResponse";

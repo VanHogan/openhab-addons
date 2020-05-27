@@ -80,7 +80,7 @@ public class Requests {
         return null;
     }
 
-    public Request getRequestByByte(byte requestByte) {
+    public Request getRequestByByte(byte[] requestByte) {
         for (Request request : requestList) {
             if (request.getRequestByte() == requestByte) {
                 return request;

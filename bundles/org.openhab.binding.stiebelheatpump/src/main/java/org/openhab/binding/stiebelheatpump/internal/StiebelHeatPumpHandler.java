@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
+import org.openhab.binding.stiebelheatpump.protocol.DataParser;
 import org.openhab.binding.stiebelheatpump.protocol.RecordDefinition;
 import org.openhab.binding.stiebelheatpump.protocol.RecordDefinition.Type;
 import org.openhab.binding.stiebelheatpump.protocol.Request;
@@ -128,12 +130,13 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
                     break;
                 case CHANNEL_DUMPRESPONSE:
                     for (byte requestByte : DEBUGBYTES) {
-                        Request request = heatPumpConfiguration.getRequestByByte(requestByte);
+                        byte[] debugBytes = new byte[] { requestByte };
+                        Request request = heatPumpConfiguration.getRequestByByte(debugBytes);
                         if (request == null) {
-                            String requestStr = String.format("%02X", requestByte);
+                            String requestStr = DataParser.bytesToHex(debugBytes);
                             logger.debug("Could not find request for {} in the thingtype definition.", requestStr);
                             request = new Request();
-                            request.setRequestByte(requestByte);
+                            request.setRequestByte(debugBytes);
                         }
                         communicationService.dumpResponse(request);
                         Thread.sleep(config.waitingTime);
@@ -195,7 +198,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
             logger.debug("Could not find valid record definitionrequest in channel for: {}", channelId);
             return;
         }
-        String requestStr = String.format("%02X", request.getRequestByte());
+        String requestStr = DataParser.bytesToHex(request.getRequestByte(), true);
         logger.debug("Found valid record definition in request {} with ChannelID:{}", requestStr, channelId);
         RecordDefinition record = request.getRecordDefinitionByChannelId(channelId);
         if (record == null) {
@@ -632,16 +635,16 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
      */
     private boolean categorizeHeatPumpConfiguration() {
         for (Request request : heatPumpConfiguration.getRequests()) {
-            String requestByte = String.format("%02X", request.getRequestByte());
-            logger.debug("Request : RequestByte -> {}", requestByte);
+            String requestStr = DataParser.bytesToHex(request.getRequestByte());
+            logger.debug("Request : RequestByte -> {}", requestStr);
 
-            if (request.getRequestByte() == REQUEST_VERSION) {
+            if (Arrays.equals(request.getRequestByte(), REQUEST_VERSION)) {
                 versionRequest = request;
-                logger.debug("set version request : {}", requestByte);
+                logger.debug("set version request : {}", requestStr);
             }
-            if (timeRequest == null && request.getRequestByte() == REQUEST_TIME) {
+            if (timeRequest == null && Arrays.equals(request.getRequestByte(), REQUEST_TIME)) {
                 timeRequest = request;
-                logger.debug("set time request : {}", requestByte);
+                logger.debug("set time request : {}", requestStr);
             }
 
             // group requests in different categories by investigating data type in first record
@@ -681,7 +684,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
             String channelId = parts[parts.length - 1];
             Request request = heatPumpConfiguration.getRequestByChannelId(channelId);
             if (request != null) {
-                String requestbyte = String.format("%02X", request.getRequestByte());
+                String requestStr = DataParser.bytesToHex(request.getRequestByte());
                 RecordDefinition record = request.getRecordDefinitionByChannelId(channelId);
                 if (record == null) {
                     logger.warn("Could not find valid record definition for {},  please verify thing definition.",
@@ -691,12 +694,12 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
                 record.setChannelid(channelUID.getId());
                 if (record.getDataType() == Type.Settings && !heatPumpSettingRefresh.getRequests().contains(request)) {
                     heatPumpSettingRefresh.getRequests().add(request);
-                    logger.info("Request {} added to setting refresh scheduler.", requestbyte);
+                    logger.info("Request {} added to setting refresh scheduler.", requestStr);
                 }
                 if (record.getDataType() != Type.Settings
                         && !heatPumpSensorStatusRefresh.getRequests().contains(request)) {
                     heatPumpSensorStatusRefresh.getRequests().add(request);
-                    logger.info("Request {} added to sensor/status refresh scheduler.", requestbyte);
+                    logger.info("Request {} added to sensor/status refresh scheduler.", requestStr);
                 }
             }
         }

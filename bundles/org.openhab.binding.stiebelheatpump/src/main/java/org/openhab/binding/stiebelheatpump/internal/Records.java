@@ -13,6 +13,7 @@
 package org.openhab.binding.stiebelheatpump.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
@@ -72,7 +73,7 @@ public class Records {
         Requests requests = new Requests();
 
         for (Record record : records) {
-            byte requestByte = DatatypeConverter.parseHexBinary(record.getRequestByte())[0];
+            byte[] requestByte = DatatypeConverter.parseHexBinary(record.getRequestByte());
 
             RecordDefinition recordDefinition = new RecordDefinition();
             recordDefinition.setChannelid(record.getChannelid());
@@ -101,7 +102,7 @@ public class Records {
 
             boolean found = false;
             for (Request request : requests.getRequests()) {
-                if (request.getRequestByte() == requestByte) {
+                if (Arrays.equals(request.getRequestByte(), requestByte)) {
                     request.getRecordDefinitions().add(recordDefinition);
                     found = true;
                 }

@@ -69,7 +69,7 @@ public class DataParser {
     public Map<String, Object> parseRecords(final byte[] response, Request request) throws StiebelHeatPumpException {
 
         Map<String, Object> map = new HashMap<>();
-        String bytes = bytesToHex(response);
+        String bytes = bytesToHex(response, true);
         logger.debug("Parse bytes: {}", bytes);
 
         if (response.length < 2) {
@@ -105,7 +105,7 @@ public class DataParser {
      * @throws StiebelHeatPumpException
      */
     public Object parseRecord(byte[] response, RecordDefinition recordDefinition) throws StiebelHeatPumpException {
-        String responseStr = bytesToHex(response);
+        String responseStr = bytesToHex(response, true);
         try {
             if (response.length < 2) {
                 logger.error("response does not have a valid length of bytes: {}", responseStr);
@@ -248,7 +248,7 @@ public class DataParser {
             throw new StiebelHeatPumpException("invalid response length on request of data " + bytesToHex(response));
         }
         if (response[0] != ESCAPE) {
-            throw new StiebelHeatPumpException("invalid response on request of data " + bytesToHex(response));
+            throw new StiebelHeatPumpException("invalid response on request of data " + bytesToHex(response, true));
         }
         if (response.length == 2 && response[1] == DATAAVAILABLE[1]) {
             return true;
@@ -266,21 +266,22 @@ public class DataParser {
     public void verifyHeader(byte[] response) throws StiebelHeatPumpException {
 
         if (response.length < 4) {
-            throw new StiebelHeatPumpException("invalide response length on request of data " + bytesToHex(response));
+            throw new StiebelHeatPumpException(
+                    "invalide response length on request of data " + bytesToHex(response, true));
         }
 
         if (response[0] != HEADERSTART) {
             throw new StiebelHeatPumpException(
-                    "invalid response on request of data, found no header start: " + bytesToHex(response));
+                    "invalid response on request of data, found no header start: " + bytesToHex(response, true));
         }
 
         if (response[1] != GET & response[1] != SET) {
-            throw new StiebelHeatPumpException(
-                    "invalid response on request of data, response is neither get nor set: " + bytesToHex(response));
+            throw new StiebelHeatPumpException("invalid response on request of data, response is neither get nor set: "
+                    + bytesToHex(response, true));
         }
 
         if (response[2] != calculateChecksum(response)) {
-            throw new StiebelHeatPumpException("invalid checksum on request of data " + bytesToHex(response));
+            throw new StiebelHeatPumpException("invalid checksum on request of data " + bytesToHex(response, true));
         }
     }
 
@@ -583,13 +584,13 @@ public class DataParser {
      *            to be converted
      * @return string representing the bytes
      */
-    public static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(byte[] bytes, boolean format) {
         int dwords = bytes.length / 4 + 1;
         char[] hexChars = new char[bytes.length * 3 + dwords * 4];
         int position = 0;
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
-            if (j % 4 == 0) {
+            if (format && j % 4 == 0) {
                 String str = "(" + String.format("%02d", j) + ")";
                 char[] charArray = str.toCharArray();
                 for (char character : charArray) {
@@ -606,4 +607,9 @@ public class DataParser {
         }
         return new String(hexChars);
     }
+
+    public static String bytesToHex(byte[] bytes) {
+        return bytesToHex(bytes, false);
+    }
+
 }

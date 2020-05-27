@@ -121,7 +121,7 @@ public class SerialConnector implements ProtocolConnector {
     @Override
     public void write(byte[] data) throws StiebelHeatPumpException {
         try {
-            String dataStr = DataParser.bytesToHex(data);
+            String dataStr = DataParser.bytesToHex(data, true);
             logger.debug("Send request message : {}", dataStr);
             out.write(data);
             out.flush();

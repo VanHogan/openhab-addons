@@ -196,7 +196,7 @@ public class CommunicationService {
      */
     public Map<String, Object> readData(Request request) throws StiebelHeatPumpException {
         Map<String, Object> data = new HashMap<>();
-        String requestStr = String.format("%02X", request.getRequestByte());
+        String requestStr = DataParser.bytesToHex(request.getRequestByte(), false);
         logger.debug("RequestByte -> {}", requestStr);
         byte[] responseAvailable;
         byte[] requestMessage = createRequestMessage(request.getRequestByte());
@@ -503,20 +503,36 @@ public class CommunicationService {
      *            message
      * @return request message byte[]
      */
-    private byte[] createRequestMessage(byte requestByte) {
+    private byte[] createRequestMessage(byte[] requestytes) {
         short checkSum;
-        byte[] requestMessage = new byte[] { DataParser.HEADERSTART, DataParser.GET, (byte) 0x00, requestByte,
-                DataParser.ESCAPE, DataParser.END };
+        byte[] requestMessage = concat(new byte[] { DataParser.HEADERSTART, DataParser.GET, (byte) 0x00 }, requestytes,
+                new byte[] { DataParser.ESCAPE, DataParser.END });
         try {
             // prepare request message
             checkSum = parser.calculateChecksum(requestMessage);
             requestMessage[2] = parser.shortToByte(checkSum)[0];
             requestMessage = parser.addDuplicatedBytes(requestMessage);
         } catch (StiebelHeatPumpException e) {
-            String requestStr = String.format("%02X", requestByte);
+            String requestStr = String.format("%02X", requestytes);
             logger.error("Could not create request [{}] message !", requestStr, e.toString());
         }
         return requestMessage;
     }
 
+    byte[] concat(byte[]... arrays) {
+        // Determine the length of the result array
+        int totalLength = 0;
+        for (int i = 0; i < arrays.length; i++) {
+            totalLength += arrays[i].length;
+        }
+        // create the result array
+        byte[] result = new byte[totalLength];
+        // copy the source arrays into the result array
+        int currentIndex = 0;
+        for (int i = 0; i < arrays.length; i++) {
+            System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
+            currentIndex += arrays[i].length;
+        }
+        return result;
+    }
 }

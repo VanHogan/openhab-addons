@@ -28,14 +28,14 @@ public class Request {
     private Logger logger = LoggerFactory.getLogger(Request.class);
     private String name;
     private String description;
-    private Byte requestByte;
+    private byte[] requestByte;
     private List<RecordDefinition> recordDefinitionList;
 
     public Request() {
         this.recordDefinitionList = new ArrayList<>();
     }
 
-    public Request(String name, String description, byte requestByte) {
+    public Request(String name, String description, byte[] requestByte) {
         this.name = name;
         this.description = description;
         this.requestByte = requestByte;
@@ -58,11 +58,11 @@ public class Request {
         this.description = description;
     }
 
-    public byte getRequestByte() {
+    public byte[] getRequestByte() {
         return requestByte;
     }
 
-    public void setRequestByte(byte requestByte) {
+    public void setRequestByte(byte[] requestByte) {
         this.requestByte = requestByte;
     }
 

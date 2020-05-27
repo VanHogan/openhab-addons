@@ -28,7 +28,7 @@ public class RecordDefinition {
 
     private String channelid;
 
-    private byte requestByte;
+    private byte[] requestByte;
 
     private Type dataType;
 
@@ -67,7 +67,7 @@ public class RecordDefinition {
      * @param unit
      *            of the value
      */
-    public RecordDefinition(String channelid, byte requestByte, int position, int lenght, double scale, Type dataType,
+    public RecordDefinition(String channelid, byte[] requestByte, int position, int lenght, double scale, Type dataType,
             String unit) {
         this.channelid = channelid;
         this.requestByte = requestByte;
@@ -103,7 +103,7 @@ public class RecordDefinition {
      * @param unit
      *            of the value
      */
-    public RecordDefinition(String channelid, byte requestByte, int position, int lenght, double scale, Type dataType,
+    public RecordDefinition(String channelid, byte[] requestByte, int position, int lenght, double scale, Type dataType,
             int min, int max, double step, int bitPosition, String unit) {
         this.channelid = channelid;
         this.requestByte = requestByte;
@@ -140,7 +140,7 @@ public class RecordDefinition {
      * @param unit
      *            of the value
      */
-    public RecordDefinition(String channelid, byte requestByte, int position, int lenght, double scale, Type dataType,
+    public RecordDefinition(String channelid, byte[] requestByte, int position, int lenght, double scale, Type dataType,
             int min, int max, double step, String unit) {
         this.channelid = channelid;
         this.requestByte = requestByte;
@@ -162,11 +162,11 @@ public class RecordDefinition {
         this.channelid = channelid;
     }
 
-    public byte getRequestByte() {
+    public byte[] getRequestByte() {
         return requestByte;
     }
 
-    public void setRequestByte(byte requestByte) {
+    public void setRequestByte(byte[] requestByte) {
         this.requestByte = requestByte;
     }
 
