@@ -229,7 +229,7 @@ public class StiebelHeatPumpHandler extends BaseThingHandler {
             logger.debug("No Request found for channelid {} !", channelId);
             return;
         }
-        String requestStr = String.format("%02X", request.getRequestByte());
+        String requestStr = DataParser.bytesToHex(request.getRequestByte(), true);
         List<Channel> channels = getThing().getChannels();
         Boolean toBeRemoved = false;
         for (Channel channel : channels) {
